@@ -42,7 +42,7 @@ namespace PixelPerfect
 
                 if (doodle.Type == 0)//Ring
                 {
-                    DrawRingWorld(_cs.LocalPlayer, doodle.Radius, doodle.Segments, doodle.Thickness, ImGui.GetColorU32(doodle.Colour),doodle.Offset,doodle.Vector);
+                    DrawRingWorld(_cs.LocalPlayer, doodle.Radius, doodle.Segments,doodle.SegStart, doodle.SegEnd, doodle.Thickness, ImGui.GetColorU32(doodle.Colour),doodle.Offset,doodle.Vector,doodle.North);
                 }
                 if (doodle.Type == 1)//Line
                 {
@@ -117,6 +117,10 @@ namespace PixelPerfect
                     {
                         ImGui.GetWindowDrawList().AddCircle(new Vector2(pos.X, pos.Y), doodle.Radius, ImGui.GetColorU32(doodle.Colour), doodle.Segments, doodle.Thickness);
                     }
+                }
+                if (doodle.Type == 3)//Cone
+                {
+                    DrawArcWorld(_cs.LocalPlayer, doodle.Radius, doodle.Segments, doodle.SegStart, doodle.SegEnd, doodle.Thickness, ImGui.GetColorU32(doodle.Colour), doodle.Offset, doodle.Vector, doodle.North);
                 }
             }
             ImGui.End();

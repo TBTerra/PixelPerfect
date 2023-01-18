@@ -133,6 +133,8 @@ namespace PixelPerfect
                         var job = doodle.Job;
                         var jobsBool = doodle.JobsBool;
                         var offset = doodle.Offset;
+                        var segStart = doodle.SegStart;
+                        var segEnd = doodle.SegEnd;
 
                         ImGui.PushItemWidth(300);
                         ImGui.Combo($"Type ##{number}",ref type, doodleOptions, doodleOptions.Length);
@@ -159,14 +161,19 @@ namespace PixelPerfect
                         
                         if (type == 0)//ring
                         {
+                            ImGui.Checkbox($"Locked North ##{number}", ref north);
+                            if (ImGui.IsItemHovered()) { ImGui.SetTooltip("Otherwise, player relative"); }
                             ImGui.InputFloat($"Radius##{number}", ref radius,0.1f, 1f);
                             ImGui.InputInt($"Segments ##{number}", ref segments, 1, 10);
+                            ImGui.InputInt($"Segment start##{number}", ref segStart, 1, 10);
+                            ImGui.InputInt($"Segment end##{number}", ref segEnd, 1, 10);
                             ImGui.Checkbox($"Offset##{number}", ref offset);
                             if (offset)
                             {
                                 ImGui.InputFloat($"Offset X##{number}", ref x1, 0.1f, 1f);
                                 ImGui.InputFloat($"Offset Y##{number}", ref z1, 0.1f, 1f);
                             }
+
                         }
 
                         if (type==1) //line
@@ -195,6 +202,21 @@ namespace PixelPerfect
                                 ImGui.InputFloat($"Offset Y##{number}", ref z1, 0.1f, 1f);
                             }
                         }
+
+                        if (type == 3)//cone
+                        {
+                            ImGui.InputFloat($"Radius##{number}", ref radius, 0.1f, 1f);
+                            ImGui.InputInt($"Segments ##{number}", ref segments, 1, 10);
+                            ImGui.InputInt($"Segment start##{number}", ref segStart, 1, 10);
+                            ImGui.InputInt($"Segment end##{number}", ref segEnd, 1, 10);
+                            ImGui.Checkbox($"Offset##{number}", ref offset);
+                            if (offset)
+                            {
+                                ImGui.InputFloat($"Offset X##{number}", ref x1, 0.1f, 1f);
+                                ImGui.InputFloat($"Offset Y##{number}", ref z1, 0.1f, 1f);
+                            }
+
+                        }
                         ImGui.PopItemWidth();
                         doodle.Type = type;
                         doodle.Colour = colour;
@@ -208,6 +230,8 @@ namespace PixelPerfect
                         doodle.Job = job;
                         doodle.JobsBool = jobsBool;
                         doodle.Offset = offset;
+                        doodle.SegStart = segStart;
+                        doodle.SegEnd = segEnd;
 
                         if (ImGui.Button($"Show Editor##{number}"))
                         {

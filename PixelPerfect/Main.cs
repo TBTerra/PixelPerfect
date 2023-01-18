@@ -84,9 +84,10 @@ namespace PixelPerfect
                         doodle.JobsBool[doodle.Job] = true;
                     }
                 }
+                SaveConfig();
             }
 
-            doodleOptions = new string[3]{ "Ring","Line","Dot"};
+            doodleOptions = new string[4]{ "Ring","Line","Dot","Cone"};
             doodleJobs = new String[21] { "All", "PLD", "WAR", "DRK", "GNB", "WHM", "SCH", "AST", "SGE", "MNK", "DRG", "NIN", "SAM", "RPR", "BRD", "MCH", "DNC", "BLM", "SMN",  "RDM","BLU" };
             doodleJobsUint = new uint[21] { 0, 19, 21, 32, 37, 24, 28, 33, 40, 20, 22, 30, 34, 39, 23, 31, 38, 25, 27, 35, 36 };
             
@@ -171,11 +172,14 @@ namespace PixelPerfect
         {
             _configuration.DoodleBag = doodleBag;
 
+
             _pi.SavePluginConfig(_configuration);
         }
 
-        private void DrawRingWorld(Dalamud.Game.ClientState.Objects.Types.Character actor, float radius, int numSegments, float thicc, uint colour, bool offset,Vector4 off)
+        private void DrawRingWorld(Dalamud.Game.ClientState.Objects.Types.Character actor, float radius, int numSegments,int segStart, int segEnd, float thicc, uint colour, bool offset,Vector4 off, bool North)
         {
+            //Alter -degree- start somehow
+
             var xOff = 0f;
             var yOff = 0f;
             if (offset)
@@ -184,15 +188,64 @@ namespace PixelPerfect
                 yOff = off.Y;
             }
             var seg = numSegments / 2;
+            var sin = Math.Sin(-_cs.LocalPlayer.Rotation + Math.PI);
+            var cos = Math.Cos(-_cs.LocalPlayer.Rotation + Math.PI);
+
             for (var i = 0; i <= numSegments; i++)
             {
-                _gui.WorldToScreen(new Num.Vector3(
-                    actor.Position.X + xOff + (radius * (float)Math.Sin((Math.PI / seg) * i)),
-                    actor.Position.Y,
-                    actor.Position.Z + yOff + (radius * (float)Math.Cos((Math.PI / seg) * i))
-                    ),
-                    out Num.Vector2 pos);
-                ImGui.GetWindowDrawList().PathLineTo(new Num.Vector2(pos.X, pos.Y));
+                if (i >= segStart && i <= segEnd)
+                
+                    var xOld = actor.Position.X + xOff + (radius * (float)Math.Sin((Math.PI / seg) * i));
+                    var zOld = actor.Position.Z + yOff + (radius * (float)Math.Cos((Math.PI / seg) * i));
+
+                    var xr1 = cos * (off.W) - sin * (off.X) + actor.Position.X;
+                    var yr1 = sin * (off.W) + cos * (off.X) + actor.Position.Z;
+                    if (North)
+                    {
+                        _gui.WorldToScreen(new Vector3(xOld, actor.Position.Y, zOld), out Vector2 pos);
+                        ImGui.GetWindowDrawList().PathLineTo(new Vector2(pos.X, pos.Y));
+                    }
+                    else
+                    {
+                        _gui.WorldToScreen(new Vector3((float)xr1, actor.Position.Y, (float)yr1), out Vector2 pos);
+                        ImGui.GetWindowDrawList().PathLineTo(new Vector2(pos.X, pos.Y));
+                    }
+                    
+                    
+                }
+            }
+            ImGui.GetWindowDrawList().PathStroke(colour, ImDrawFlags.None, thicc);
+        }
+
+        private void DrawArcWorld(Dalamud.Game.ClientState.Objects.Types.Character actor, float radius, int numSegments, int segStart, int segEnd, float thicc, uint colour, bool offset, Vector4 off, bool north)
+        {
+            //Alter -degree- start somehow
+
+            var xOff = 0f;
+            var yOff = 0f;
+            if (offset)
+            {
+                xOff = off.X;
+                yOff = off.Y;
+            }
+            var seg = numSegments / 2;
+            for (var i = 0; i <= numSegments; i++)
+            {
+                if(i == segStart | i == segEnd)
+                {
+                    _gui.WorldToScreen(new Num.Vector3( actor.Position.X ,actor.Position.Y, actor.Position.Z),out Num.Vector2 pos);
+                    ImGui.GetWindowDrawList().PathLineTo(new Num.Vector2(pos.X, pos.Y));
+                }
+                if (i >= segStart && i < segEnd)
+                {
+                    _gui.WorldToScreen(new Num.Vector3(
+                        actor.Position.X + xOff + (radius * (float)Math.Sin(((Math.PI) / seg) * i)),
+                        actor.Position.Y,
+                        actor.Position.Z + yOff + (radius * (float)Math.Cos(((Math.PI) / seg) * i))
+                        ),
+                        out Num.Vector2 pos);
+                    ImGui.GetWindowDrawList().PathLineTo(new Num.Vector2(pos.X, pos.Y));
+                }
             }
             ImGui.GetWindowDrawList().PathStroke(colour, ImDrawFlags.None, thicc);
         }
@@ -230,6 +283,8 @@ namespace PixelPerfect
         public bool Combat { get; set; } = false;
         public bool Instance { get; set; } = false;
         public bool Offset { get; set; } = false;
+        public int SegStart { get; set; } = 0;
+        public int SegEnd { get; set; } = 100;
     }
 
 
